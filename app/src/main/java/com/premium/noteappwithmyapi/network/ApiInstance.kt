@@ -9,11 +9,12 @@ import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 
 object ApiInstance {
     private val logging = HttpLoggingInterceptor()
-    val token : String? = null
+    var token : String? = null
 
     private fun okHttpClient() : OkHttpClient {
         return OkHttpClient.Builder().addNetworkInterceptor(object : Interceptor{
@@ -22,7 +23,8 @@ object ApiInstance {
                     chain.request().newBuilder().addHeader("Authorization", "Bearer $token").build()
                 return chain.proceed(request)
             }
-        }).addInterceptor(logging).build()
+        }).addInterceptor(logging).connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS).build()
     }
 
     private val buildRequest: Retrofit by lazy {
