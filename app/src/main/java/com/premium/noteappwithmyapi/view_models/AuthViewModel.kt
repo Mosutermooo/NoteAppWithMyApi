@@ -63,7 +63,6 @@ class AuthViewModel(
                 loginState.emit(Resource.Success(it))
             }
         }else{
-            val b = response.errorBody()
             when(response.code()){
                 400 -> {
                     loginState.emit(Resource.Error(
@@ -107,6 +106,8 @@ class AuthViewModel(
             registerState.emit(Resource.Error(null, "Password is too empty"))
             return@launch
         }
+
+        registerState.emit(Resource.Loading())
 
         val registerRequest = AuthRequest(
             email, username, password

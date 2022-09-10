@@ -61,6 +61,7 @@ class RegisterFragment : Fragment() {
                             showProgressDialog()
                         }
                         is Resource.Success -> {
+                            stopProgressDialog()
                             it.data?.let { data ->
                                 Log.e("data", "$data")
                                 showSnackBar("Successfully registered your account")
