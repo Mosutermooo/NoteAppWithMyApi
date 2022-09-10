@@ -8,5 +8,18 @@
         android:id="@+id/notesFragment"
         android:name="com.premium.noteappwithmyapi.ui.main_fragments.NotesFragment"
         android:label="fragment_notes_framgent"
-        tools:layout="@layout/fragment_notes_framgent" />
+        tools:layout="@layout/fragment_notes_framgent" >
+        <action
+            android:id="@+id/action_notesFragment_to_addNoteFragment"
+            app:destination="@id/addNoteFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
+    <fragment
+        android:id="@+id/addNoteFragment"
+        android:name="com.premium.noteappwithmyapi.ui.main_fragments.AddNoteFragment"
+        android:label="fragment_add_note"
+        tools:layout="@layout/fragment_add_note" />
 </navigation>

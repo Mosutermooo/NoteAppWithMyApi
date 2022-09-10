@@ -8,4 +8,6 @@
     <string name="username">Username</string>
     <string name="register">Register</string>
     <string name="email_username">Email/Username</string>
+    <string name="note_text">Note Text</string>
+    <string name="addNote">Add note</string>
 </resources>

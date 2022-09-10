@@ -14,7 +14,9 @@
         android:theme="@style/Theme.NoteAppWithMyApi">
         <activity
             android:name=".ui.activities.MainActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme.MainActivityTheme"/>
         <activity
             android:name=".ui.activities.AuthActivity"
             android:exported="true">

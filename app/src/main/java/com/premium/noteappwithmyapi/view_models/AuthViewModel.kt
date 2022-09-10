@@ -3,12 +3,15 @@ package com.premium.noteappwithmyapi.view_models
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.premium.noteappwithmyapi.models.AlreadyLoggedInUser
 import com.premium.noteappwithmyapi.models.AuthRequest
 import com.premium.noteappwithmyapi.models.AuthResponse
+import com.premium.noteappwithmyapi.models.User
 import com.premium.noteappwithmyapi.network.ApiInstance
 import com.premium.noteappwithmyapi.network.SeasonManager
 import com.premium.noteappwithmyapi.repos.AuthRepositoryImpl
 import com.premium.noteappwithmyapi.repos.AuthRepositoryTestImpl
+import com.premium.noteappwithmyapi.utils.DataStore
 import com.premium.noteappwithmyapi.utils.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -21,7 +24,9 @@ class AuthViewModel(
     private val repository: AuthRepositoryImpl = AuthRepositoryImpl(ApiInstance.apiService)
     private val testRepository: AuthRepositoryTestImpl = AuthRepositoryTestImpl()
     val loginState : MutableStateFlow<Resource<AuthResponse>> = MutableStateFlow(Resource.Idle())
+    val isAlreadyLoggedInState : MutableStateFlow<Resource<AlreadyLoggedInUser>> = MutableStateFlow(Resource.Idle())
     val registerState : MutableStateFlow<Resource<AuthResponse>> = MutableStateFlow(Resource.Idle())
+    private val dataStore = DataStore(app)
 
     fun loginUser(
         email_Username: String,
@@ -60,6 +65,7 @@ class AuthViewModel(
             response.body()?.let {
                 val token = it.token
                 seasonManager.saveToken(token)
+                saveLoginData(email_Username, password, it.user?.id!!)
                 loginState.emit(Resource.Success(it))
             }
         }else{
@@ -121,8 +127,25 @@ class AuthViewModel(
         }else{
             registerState.emit(Resource.Error(null, "${response.code()}"))
         }
+    }
 
+    private fun saveLoginData(email_Username: String, password: String, id: String) = viewModelScope.launch {
+        dataStore.save("email_username", email_Username)
+        dataStore.save("password", password)
+        dataStore.save("id", id)
+    }
 
+    fun checkIsUserAlreadyLoggedIn() = viewModelScope.launch {
+        val emailUsername = dataStore.read("email_username")
+        val password = dataStore.read("password")
+        if(emailUsername != null && password != null){
+            val loggedIn = AlreadyLoggedInUser(
+                emailUsername, password
+            )
+            isAlreadyLoggedInState.emit(Resource.Success(loggedIn))
+        }else{
+            isAlreadyLoggedInState.emit(Resource.Error(null, ""))
+        }
     }
 
 

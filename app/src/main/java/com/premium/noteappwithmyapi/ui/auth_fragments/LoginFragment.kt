@@ -44,36 +44,60 @@ class LoginFragment : Fragment() {
 
         authViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application = requireActivity().application).create(AuthViewModel::class.java)
 
+        authViewModel.checkIsUserAlreadyLoggedIn()
+        lifecycleScope.launchWhenStarted {
+            authViewModel.isAlreadyLoggedInState.collect{
+                when(it){
+                    is Resource.Success -> {
+                       it.data?.let {data ->
+                           loginUser(
+                               data.email_username,
+                               data.password
+                           )
+                       }
+                    }
+                }
+            }
+        }
+
+
         binding.register.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
         }
 
         binding.Login.setOnClickListener {
-            authViewModel.loginUser(
+            loginUser(
                 binding.emailUsername.text.toString(),
                 binding.password.text.toString()
             )
-            lifecycleScope.launchWhenStarted {
-                authViewModel.loginState.collectLatest {
-                    when(it){
-                        is Resource.Error -> {
-                            stopProgressDialog()
-                            showSnackBar(it.message.toString())
-                        }
-                        is Resource.Loading -> {
-                            showProgressDialog()
-                        }
-                        is Resource.Success -> {
-                            stopProgressDialog()
-                            it.data?.let { response ->
-                                showSnackBar(response.message)
-                                val token = SeasonManager(requireContext()).fetchToken()
-                                Log.e("token", "${token}")
-                                ApiInstance.token = token
-                                Intent(requireActivity(), MainActivity::class.java).also { intent ->
-                                    startActivity(intent)
-                                    requireActivity().finish()
-                                }
+        }
+    }
+
+    private fun loginUser(email_username: String, password: String) {
+        authViewModel.loginUser(
+            email_username,
+            password
+        )
+        lifecycleScope.launchWhenStarted {
+            authViewModel.loginState.collectLatest {
+                when(it){
+                    is Resource.Error -> {
+                        stopProgressDialog()
+                        showSnackBar(it.message.toString())
+                    }
+                    is Resource.Loading -> {
+                        showProgressDialog()
+                    }
+                    is Resource.Success -> {
+                        stopProgressDialog()
+                        it.data?.let { response ->
+                            showSnackBar(response.message)
+                            val token = SeasonManager(requireContext()).fetchToken()
+                            Log.e("token", "${token}")
+                            ApiInstance.token = token
+                            Intent(requireActivity(), MainActivity::class.java).also { intent ->
+                                startActivity(intent)
+                                requireActivity().finish()
                             }
                         }
                     }
